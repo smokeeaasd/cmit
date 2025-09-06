@@ -3,6 +3,7 @@ package form
 import (
 	"errors"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
 )
 
@@ -53,5 +54,15 @@ func CreateForm() *huh.Form {
 				Validate(ValidateMessage).
 				Value(&Message),
 		),
-	)
+	).WithKeyMap(&huh.KeyMap{
+		Select: huh.NewDefaultKeyMap().Select,
+		Input:  huh.NewDefaultKeyMap().Input,
+		Text: huh.TextKeyMap{
+			Next:    key.NewBinding(key.WithKeys("ctrl+enter"), key.WithHelp("ctrl+enter", "next")),
+			Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "back")),
+			NewLine: key.NewBinding(key.WithKeys("enter", "ctrl+j"), key.WithHelp("enter / ctrl+j", "new line")),
+			Submit:  key.NewBinding(key.WithKeys("alt+enter", "ctrl+s"), key.WithHelp("alt+enter / ctrl+s", "submit")),
+		},
+		Quit: huh.NewDefaultKeyMap().Quit,
+	})
 }
