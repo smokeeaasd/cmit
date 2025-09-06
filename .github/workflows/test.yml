@@ -1,11 +1,18 @@
-name: CI
+name: test
 
 on:
   push:
     branches:
       - main
-      - master
+      - develop
+      - feature/**
+      - fix/**
   pull_request:
+    branches:
+      - main
+      - develop
+      - feature/**
+      - fix/**
 
 jobs:
   build-and-test:
@@ -32,22 +39,3 @@ jobs:
 
       - name: Run tests
         run: go test -v ./...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
