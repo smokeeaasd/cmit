@@ -1,0 +1,59 @@
+version: "2"
+linters:
+  enable:
+    - dupl
+    - gocyclo
+    - misspell
+    - unparam
+  disable:
+    - gochecknoglobals
+  settings:
+    dupl:
+      threshold: 100
+    gocyclo:
+      min-complexity: 10
+    misspell:
+      locale: US
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - errcheck
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
