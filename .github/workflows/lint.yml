@@ -1,4 +1,5 @@
-name: Run lint checks
+name: Run Lint Checks
+
 on:
   push:
     branches:
@@ -15,8 +16,7 @@ on:
 
 permissions:
   contents: read
-  # Optional: allow read access to pull requests. Use with `only-new-issues` option.
-  # pull-requests: read
+  pull-requests: read
 
 jobs:
   golangci:
@@ -24,7 +24,7 @@ jobs:
       matrix:
         go: [stable]
         os: [ubuntu-latest, macos-latest, windows-latest]
-    name: lint
+    name: Lint
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -33,21 +33,3 @@ jobs:
           go-version: ${{ matrix.go }}
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
