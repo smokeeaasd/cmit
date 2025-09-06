@@ -33,3 +33,5 @@ jobs:
           go-version: ${{ matrix.go }}
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
+        with:
+          only-new-issues: true
