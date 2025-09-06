@@ -19,7 +19,7 @@ A **CLI tool to standardize commit messages** following the Conventional Commits
 ### Using Go
 
 ```sh
-go install github.com/smokeeaasd/cmit/cmd@latest
+go install github.com/smokeeaasd/cmit/cmd/cmit@latest
 ```
 
 Make sure `$GOPATH/bin` (or `%USERPROFILE%\go\bin` on Windows) is in your `PATH`.
