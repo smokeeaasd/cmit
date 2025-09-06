@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/charmbracelet/huh"
-	"github.com/smokeeaasd/cmit/internal/keymap"
 )
 
 var (
@@ -52,8 +51,7 @@ func CreateForm() *huh.Form {
 				Description("Enter a concise and descriptive commit message").
 				CharLimit(1000).
 				Validate(ValidateMessage).
-				Value(&Message).
-				WithKeyMap(&keymap.DefaultKeyMap),
+				Value(&Message),
 		),
 	)
 }
