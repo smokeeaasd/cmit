@@ -25,7 +25,9 @@ var commitLabels = map[string]string{
 	"test":     "✅ test",
 }
 
-func ExecuteCommit() {
+var execCommand = exec.Command
+
+func ExecuteCommit(extraArgs []string) {
 	commitPrefix, ok := commitLabels[form.CommitType]
 	if !ok {
 		log.Fatal("Invalid commit type selected")
@@ -42,8 +44,11 @@ func ExecuteCommit() {
 	fmt.Printf("\n✅ Commit message: \n%s\n\n", commitMessage)
 
 	cmdArgs := []string{"commit", "-m", escapedMessage}
-	cmd := exec.Command("git", cmdArgs...)
+	if len(extraArgs) > 0 {
+		cmdArgs = append(cmdArgs, extraArgs...)
+	}
 
+	cmd := execCommand("git", cmdArgs...)
 	if GitWorkDir != "" {
 		cmd.Dir = GitWorkDir
 	} else {
@@ -52,15 +57,10 @@ func ExecuteCommit() {
 
 	out, err := cmd.CombinedOutput()
 	outputStr := string(out)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31m%s\033[0m", outputStr)
 		log.Fatalf("Failed to execute git commit: %v", err)
 	}
 
 	fmt.Print(outputStr)
-
-	if err != nil {
-		log.Fatalf("Failed to execute git commit: %v", err)
-	}
 }
