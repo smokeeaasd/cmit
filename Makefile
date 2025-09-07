@@ -17,9 +17,9 @@ all: build
 .PHONY: build
 build:
 ifeq ($(OS),Windows_NT)
-	set GOOS=windows&& set GOARCH=amd64&& go build -ldflags="-X main.Version=$(VERSION)" -o $(BIN_DIR)/$(APP_NAME).exe ./cmd/cmit
+	set GOOS=windows&& set GOARCH=amd64&& go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME).exe ./cmd/cmit
 else
-	GOOS=$(OS) GOARCH=$(ARCH) go build -ldflags="-X main.Version=$(VERSION)" -o $(BIN_DIR)/$(APP_NAME) ./cmd/cmit
+	GOOS=$(OS) GOARCH=$(ARCH) go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME) ./cmd/cmit
 endif
 
 
@@ -30,7 +30,7 @@ build-all:
 		ext=""; \
 		if [ $$os = "windows" ]; then ext=".exe"; fi; \
 		echo "Building for $$os..."; \
-		GOOS=$$os GOARCH=$(ARCH) $(GO) build -ldflags="-X main.Version=$(VERSION)" -o $(BIN_DIR)/$(APP_NAME)_$$os$$ext ./cmd/cmit; \
+		GOOS=$$os GOARCH=$(ARCH) $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)_$$os$$ext ./cmd/cmit; \
 	done
 
 .PHONY: test
