@@ -5,20 +5,16 @@ import (
 	"testing"
 
 	"github.com/smokeeaasd/cmit/internal/form"
+	"github.com/smokeeaasd/cmit/internal/utils"
 )
 
 func buildCmdArgs(message, scope, commitType string, extraArgs []string) ([]string, error) {
-	prefix, ok := commitLabels[commitType]
+	prefix, ok := utils.CommitLabels[commitType]
 	if !ok {
 		return nil, fmt.Errorf("invalid commit type: %s", commitType)
 	}
 
-	var commitMessage string
-	if scope == "" {
-		commitMessage = fmt.Sprintf("%s: %s", prefix, message)
-	} else {
-		commitMessage = fmt.Sprintf("%s(%s): %s", prefix, scope, message)
-	}
+	var commitMessage = utils.BuildCommitMessage(prefix, scope, message)
 
 	cmdArgs := []string{"commit", "-m", commitMessage}
 	if len(extraArgs) > 0 {
