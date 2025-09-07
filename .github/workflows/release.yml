@@ -22,7 +22,7 @@ jobs:
       - name: Build Linux binary
         run: |
           mkdir -p dist/linux
-          GOOS=linux GOARCH=amd64 go build -ldflags="-X main.Version=${GITHUB_REF_NAME}" -o dist/linux/cmit ./cmd/cmit
+          GOOS=linux GOARCH=amd64 go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=${GITHUB_REF_NAME}'" -o dist/linux/cmit ./cmd/main
           zip -j dist/cmit-linux.zip dist/linux/cmit
           echo "Built Linux binary and created dist/cmit-linux.zip"
 
@@ -30,7 +30,7 @@ jobs:
       - name: Build macOS binary
         run: |
           mkdir -p dist/macos
-          GOOS=darwin GOARCH=amd64 go build -ldflags="-X main.Version=${GITHUB_REF_NAME}" -o dist/macos/cmit ./cmd/cmit
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=${GITHUB_REF_NAME}'" -o dist/macos/cmit ./cmd/main
           zip -j dist/cmit-macos.zip dist/macos/cmit
           echo "Built macOS binary and created dist/cmit-macos.zip"
 
@@ -38,7 +38,7 @@ jobs:
       - name: Build Windows binary
         run: |
           mkdir -p dist/windows
-          GOOS=windows GOARCH=amd64 go build -ldflags="-X main.Version=${GITHUB_REF_NAME}" -o dist/windows/cmit.exe ./cmd/cmit
+          GOOS=windows GOARCH=amd64 go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=${GITHUB_REF_NAME}'" -o dist/windows/cmit.exe ./cmd/main
           zip -j dist/cmit-windows.zip dist/windows/cmit.exe
           echo "Built Windows binary and created dist/cmit-windows.zip"
 

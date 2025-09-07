@@ -46,7 +46,11 @@ docker run --rm -it -v $(pwd):/repo -w /repo cmit
 Inside a Git repository:
 
 ```sh
+# Start the interactive commit form
 cmit
+
+# Show a list of available commands and flags
+cmit help
 ```
 
 Example of a generated commit message:

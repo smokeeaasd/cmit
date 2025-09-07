@@ -8,42 +8,35 @@ import (
 	"strings"
 
 	"github.com/smokeeaasd/cmit/internal/form"
+	"github.com/smokeeaasd/cmit/internal/utils"
 )
 
 var GitWorkDir string
 
-var commitLabels = map[string]string{
-	"feat":     "💡 feat",
-	"fix":      "🐞 fix",
-	"build":    "📦 build",
-	"chore":    "🔧 chore",
-	"ci":       "🤖 ci",
-	"docs":     "📝 docs",
-	"style":    "🎨 style",
-	"refactor": "🔨 refactor",
-	"perf":     "🚀 perf",
-	"test":     "✅ test",
-}
+var execCommand = exec.Command
 
-func ExecuteCommit() {
-	commitPrefix, ok := commitLabels[form.CommitType]
+func ExecuteCommit(extraArgs []string) {
+	if !form.Confirm {
+		fmt.Println("Commit aborted. 👋")
+		os.Exit(0)
+	}
+
+	commitPrefix, ok := utils.CommitLabels[form.CommitType]
 	if !ok {
 		log.Fatal("Invalid commit type selected")
 	}
 
-	var commitMessage string
-	if form.Scope == "" {
-		commitMessage = fmt.Sprintf("%s: %s", commitPrefix, form.Message)
-	} else {
-		commitMessage = fmt.Sprintf("%s(%s): %s", commitPrefix, form.Scope, form.Message)
-	}
+	var commitMessage = utils.BuildCommitMessage(commitPrefix, form.Scope, form.Message)
 
 	escapedMessage := strings.ReplaceAll(commitMessage, "\"", "\\\"")
 	fmt.Printf("\n✅ Commit message: \n%s\n\n", commitMessage)
 
 	cmdArgs := []string{"commit", "-m", escapedMessage}
-	cmd := exec.Command("git", cmdArgs...)
+	if len(extraArgs) > 0 {
+		cmdArgs = append(cmdArgs, extraArgs...)
+	}
 
+	cmd := execCommand("git", cmdArgs...)
 	if GitWorkDir != "" {
 		cmd.Dir = GitWorkDir
 	} else {
@@ -52,15 +45,10 @@ func ExecuteCommit() {
 
 	out, err := cmd.CombinedOutput()
 	outputStr := string(out)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31m%s\033[0m", outputStr)
 		log.Fatalf("Failed to execute git commit: %v", err)
 	}
 
 	fmt.Print(outputStr)
-
-	if err != nil {
-		log.Fatalf("Failed to execute git commit: %v", err)
-	}
 }

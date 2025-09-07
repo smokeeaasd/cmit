@@ -5,7 +5,23 @@ import (
 	"testing"
 
 	"github.com/smokeeaasd/cmit/internal/form"
+	"github.com/smokeeaasd/cmit/internal/utils"
 )
+
+func buildCmdArgs(message, scope, commitType string, extraArgs []string) ([]string, error) {
+	prefix, ok := utils.CommitLabels[commitType]
+	if !ok {
+		return nil, fmt.Errorf("invalid commit type: %s", commitType)
+	}
+
+	var commitMessage = utils.BuildCommitMessage(prefix, scope, message)
+
+	cmdArgs := []string{"commit", "-m", commitMessage}
+	if len(extraArgs) > 0 {
+		cmdArgs = append(cmdArgs, extraArgs...)
+	}
+	return cmdArgs, nil
+}
 
 func TestCommitMessageFormatting(t *testing.T) {
 	tests := []struct {
@@ -20,24 +36,45 @@ func TestCommitMessageFormatting(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		form.CommitType = tt.commitType
-		form.Scope = tt.scope
-		form.Message = tt.message
-
-		prefix, ok := commitLabels[tt.commitType]
-		if !ok {
-			t.Fatalf("invalid commit type: %s", tt.commitType)
+		args, err := buildCmdArgs(tt.message, tt.scope, tt.commitType, nil)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
 		}
 
-		var commitMessage string
-		if tt.scope == "" {
-			commitMessage = fmt.Sprintf("%s: %s", prefix, tt.message)
-		} else {
-			commitMessage = fmt.Sprintf("%s(%s): %s", prefix, tt.scope, tt.message)
+		if args[2] != tt.expected {
+			t.Errorf("expected '%s', got '%s'", tt.expected, args[2])
 		}
+	}
+}
 
-		if commitMessage != tt.expected {
-			t.Errorf("expected '%s', got '%s'", tt.expected, commitMessage)
-		}
+func TestCommitWithExtraArgs(t *testing.T) {
+	form.CommitType = "feat"
+	form.Scope = "core"
+	form.Message = "Add feature"
+	extra := []string{"--no-verify", "--amend"}
+
+	args, err := buildCmdArgs(form.Message, form.Scope, form.CommitType, extra)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedMessage := "💡 feat(core): Add feature"
+	if args[2] != expectedMessage {
+		t.Errorf("expected commit message '%s', got '%s'", expectedMessage, args[2])
+	}
+
+	if len(args) != 5 || args[3] != "--no-verify" || args[4] != "--amend" {
+		t.Errorf("extra args not appended correctly: %v", args[3:])
+	}
+}
+
+func TestInvalidCommitType(t *testing.T) {
+	form.CommitType = "invalid"
+	form.Scope = ""
+	form.Message = "Some message"
+
+	_, err := buildCmdArgs(form.Message, form.Scope, form.CommitType, nil)
+	if err == nil {
+		t.Errorf("expected error for invalid commit type")
 	}
 }
