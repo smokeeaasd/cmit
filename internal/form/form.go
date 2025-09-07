@@ -2,15 +2,18 @@ package form
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
+	"github.com/smokeeaasd/cmit/internal/utils"
 )
 
 var (
 	CommitType string
 	Message    string
 	Scope      string
+	Confirm    bool
 )
 
 func ValidateMessage(msg string) error {
@@ -21,6 +24,20 @@ func ValidateMessage(msg string) error {
 }
 
 func CreateForm() *huh.Form {
+	KeyMap := huh.NewDefaultKeyMap()
+
+	KeyMap.Text = huh.TextKeyMap{
+		Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "back")),
+		Next:    key.NewBinding(key.WithKeys("alt+enter"), key.WithHelp("alt+enter", "next")),
+		NewLine: key.NewBinding(key.WithKeys("enter", "ctrl+j"), key.WithHelp("enter / ctrl+j", "new line")),
+	}
+
+	KeyMap.Input = huh.InputKeyMap{
+		Prev:   key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "back")),
+		Next:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "next")),
+		Submit: key.NewBinding(key.WithKeys("shift+enter"), key.WithHelp("shift+enter", "submit")),
+	}
+
 	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
@@ -54,15 +71,18 @@ func CreateForm() *huh.Form {
 				Validate(ValidateMessage).
 				Value(&Message),
 		),
-	).WithKeyMap(&huh.KeyMap{
-		Select: huh.NewDefaultKeyMap().Select,
-		Input:  huh.NewDefaultKeyMap().Input,
-		Text: huh.TextKeyMap{
-			Next:    key.NewBinding(key.WithKeys("ctrl+enter"), key.WithHelp("ctrl+enter", "next")),
-			Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "back")),
-			NewLine: key.NewBinding(key.WithKeys("enter", "ctrl+j"), key.WithHelp("enter / ctrl+j", "new line")),
-			Submit:  key.NewBinding(key.WithKeys("alt+enter", "ctrl+s"), key.WithHelp("alt+enter / ctrl+s", "submit")),
-		},
-		Quit: huh.NewDefaultKeyMap().Quit,
-	})
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title("🧐 Are you sure?").
+				DescriptionFunc(func() string {
+					commitPrefix := utils.CommitLabels[CommitType]
+					var description = fmt.Sprintf("%s\nConfirm commit creation.", utils.BuildCommitMessage(commitPrefix, Scope, Message))
+
+					return description
+				}, nil).
+				Affirmative("Yes!").
+				Negative("No.").
+				Value(&Confirm),
+		),
+	).WithKeyMap(KeyMap)
 }

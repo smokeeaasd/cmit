@@ -8,37 +8,26 @@ import (
 	"strings"
 
 	"github.com/smokeeaasd/cmit/internal/form"
+	"github.com/smokeeaasd/cmit/internal/utils"
 )
 
 var GitWorkDir string
 
-var commitLabels = map[string]string{
-	"feat":     "💡 feat",
-	"fix":      "🐞 fix",
-	"build":    "📦 build",
-	"chore":    "🔧 chore",
-	"ci":       "🤖 ci",
-	"docs":     "📝 docs",
-	"style":    "🎨 style",
-	"refactor": "🔨 refactor",
-	"perf":     "🚀 perf",
-	"test":     "✅ test",
-}
-
 var execCommand = exec.Command
 
 func ExecuteCommit(extraArgs []string) {
-	commitPrefix, ok := commitLabels[form.CommitType]
+	if !form.Confirm {
+		fmt.Println("Commit aborted. 👋")
+		os.Exit(0)
+	}
+
+	commitPrefix, ok := utils.CommitLabels[form.CommitType]
 	if !ok {
 		log.Fatal("Invalid commit type selected")
 	}
 
 	var commitMessage string
-	if form.Scope == "" {
-		commitMessage = fmt.Sprintf("%s: %s", commitPrefix, form.Message)
-	} else {
-		commitMessage = fmt.Sprintf("%s(%s): %s", commitPrefix, form.Scope, form.Message)
-	}
+	commitMessage = utils.BuildCommitMessage(commitPrefix, form.Scope, commitMessage)
 
 	escapedMessage := strings.ReplaceAll(commitMessage, "\"", "\\\"")
 	fmt.Printf("\n✅ Commit message: \n%s\n\n", commitMessage)
