@@ -3,7 +3,7 @@ name: Build and release
 on:
   push:
     tags:
-      - 'v*.*.*'  # dispara apenas em tags semânticas
+      - 'v*.*.*'
 
 jobs:
   release:
@@ -18,38 +18,21 @@ jobs:
         with:
           go-version: '1.25.1'
 
-      # Build Linux binary
-      - name: Build Linux binary
+      - name: Install golangci-lint
         run: |
-          mkdir -p dist/linux
-          GOOS=linux GOARCH=amd64 go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=${GITHUB_REF_NAME}'" -o dist/linux/cmit ./cmd/main
-          zip -j dist/cmit-linux.zip dist/linux/cmit
-          echo "Built Linux binary and created dist/cmit-linux.zip"
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
 
-      # Build macOS binary
-      - name: Build macOS binary
-        run: |
-          mkdir -p dist/macos
-          GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=${GITHUB_REF_NAME}'" -o dist/macos/cmit ./cmd/main
-          zip -j dist/cmit-macos.zip dist/macos/cmit
-          echo "Built macOS binary and created dist/cmit-macos.zip"
+      - name: Build all binaries using Makefile
+        run: make build-all
 
-      # Build Windows binary
-      - name: Build Windows binary
-        run: |
-          mkdir -p dist/windows
-          GOOS=windows GOARCH=amd64 go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=${GITHUB_REF_NAME}'" -o dist/windows/cmit.exe ./cmd/main
-          zip -j dist/cmit-windows.zip dist/windows/cmit.exe
-          echo "Built Windows binary and created dist/cmit-windows.zip"
+      - name: Prepare release artifacts
+        run: mkdir -p dist && cp bin/* dist/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: |
-            dist/cmit-linux.zip
-            dist/cmit-macos.zip
-            dist/cmit-windows.zip
+          files: dist/*
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
