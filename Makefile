@@ -11,45 +11,48 @@ ifeq ($(OS),)
 	OS := $(shell uname | tr '[:upper:]' '[:lower:]')
 endif
 
-.PHONY: all
+.PHONY: all build build-linux build-macos build-windows build-all test lint clean ci release
+
 all: build
 
-.PHONY: build
+# Build para o SO atual
 build:
 ifeq ($(OS),Windows_NT)
-	set GOOS=windows&& set GOARCH=amd64&& go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME).exe ./cmd/main
+	set GOOS=windows&& set GOARCH=$(ARCH)&& $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)-windows-$(ARCH).exe ./cmd/main
 else
-	GOOS=$(OS) GOARCH=$(ARCH) go build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME) ./cmd/main
+	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)-$(OS)-$(ARCH) ./cmd/main
 endif
 
+# Builds individuais por SO
+build-linux:
+	GOOS=linux GOARCH=$(ARCH) $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)-linux-$(ARCH) ./cmd/main
 
-.PHONY: build-all
-build-all:
-	@mkdir -p $(BIN_DIR)
-	@for os in $(OS_LIST); do \
-		ext=""; \
-		if [ $$os = "windows" ]; then ext=".exe"; fi; \
-		echo "Building for $$os..."; \
-		GOOS=$$os GOARCH=$(ARCH) $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)_$$os$$ext ./cmd/main; \
-	done
+build-darwin:
+	GOOS=darwin GOARCH=$(ARCH) $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)-darwin-$(ARCH) ./cmd/main
 
-.PHONY: test
+build-windows:
+	GOOS=windows GOARCH=$(ARCH) $(GO) build -ldflags="-X 'github.com/smokeeaasd/cmit/internal/version.Version=$(VERSION)'" -o $(BIN_DIR)/$(APP_NAME)-windows-$(ARCH).exe ./cmd/main
+
+# Build para todos
+build-all: build-linux build-darwin build-windows
+
+# Testes
 test:
 	$(GO) test -v ./...
 
-.PHONY: lint
+# Lint
 lint:
 	$(GOLANGCI) run ./...
 
-.PHONY: clean
+# Limpeza
 clean:
-	rm -rf $(BIN_DIR)
+	rm -rf $(BIN_DIR) dist
 
-.PHONY: ci
+# CI
 ci: lint test build
 
-.PHONY: release
-release: build
-	@echo "Release built for $(OS)/$(ARCH) with version $(VERSION)"
+# Release: copia binários para dist
+release: build-all
+	@echo "Release built with version $(VERSION)"
 	@mkdir -p dist
 	@cp $(BIN_DIR)/$(APP_NAME)* dist/
