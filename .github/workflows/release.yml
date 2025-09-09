@@ -3,7 +3,7 @@ name: Build and release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   release:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.25.1'
+          go-version: "1.25.1"
 
       - name: Install golangci-lint
         run: |
@@ -25,8 +25,23 @@ jobs:
       - name: Build all binaries using Makefile
         run: make build-all
 
-      - name: Prepare release artifacts
-        run: mkdir -p dist && cp bin/* dist/
+      - name: Package release artifacts
+        run: |
+          mkdir -p dist
+
+          mkdir -p tmp/windows
+          cp bin/cmit-windows-amd64.exe tmp/windows/cmit.exe
+          zip -j dist/cmit-windows-amd64.zip tmp/windows/cmit.exe
+
+          mkdir -p tmp/linux
+          cp bin/cmit-linux-amd64 tmp/linux/cmit
+          tar -czf dist/cmit-linux-amd64.tar.gz -C tmp/linux cmit
+
+          mkdir -p tmp/darwin
+          cp bin/cmit-darwin-amd64 tmp/darwin/cmit
+          tar -czf dist/cmit-darwin-amd64.tar.gz -C tmp/darwin cmit
+
+          rm -rf tmp
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
