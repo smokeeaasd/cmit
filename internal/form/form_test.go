@@ -1,20 +1,23 @@
 package form
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestValidateMessage(t *testing.T) {
+func TestValidateTitle(t *testing.T) {
 	tests := []struct {
-		message string
+		title   string
 		wantErr bool
 	}{
 		{"", true},
 		{"Add new feature", false},
+		{"This title is intentionally made longer than seventy-two characters to test the limit", true},
 	}
 
 	for _, tt := range tests {
-		err := ValidateMessage(tt.message)
+		err := ValidateTitle(tt.title)
 		if (err != nil) != tt.wantErr {
-			t.Errorf("ValidateMessage(%q) error = %v, wantErr %v", tt.message, err, tt.wantErr)
+			t.Errorf("ValidateTitle(%q) error = %v, wantErr %v", tt.title, err, tt.wantErr)
 		}
 	}
 }

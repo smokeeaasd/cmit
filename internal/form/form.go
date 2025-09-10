@@ -10,20 +10,49 @@ import (
 )
 
 var (
-	CommitType string
-	Message    string
-	Scope      string
-	Confirm    bool
+	CommitType  string
+	Title       string
+	Description string
+	Scope       string
+	Confirm     bool
 )
 
-func ValidateMessage(msg string) error {
-	if msg == "" {
-		return errors.New("commit message cannot be empty")
+func ValidateTitle(title string) error {
+	if title == "" {
+		return errors.New("commit title cannot be empty")
+	}
+	if len(title) > 72 {
+		return errors.New("commit title should be 72 characters or less")
 	}
 	return nil
 }
 
-func CreateForm() *huh.Form {
+func CreateForm(detailed bool) *huh.Form {
+	if detailed {
+		templateLines := []string{
+			"<Detailed description explaining what changed and why>",
+			"<The body can have multiple lines, usage examples, context, links, etc.>",
+			"",
+			"BREAKING CHANGE: <description of the breaking change>",
+			"",
+			"Closes #<issue number>",
+			"Fixes #<issue number>",
+			"Refs #<issue number>",
+			"Co-authored-by: Name <email>",
+			"Co-authored-by: Another Name <email>",
+			"Reviewed-by: Name <email>",
+			"Signed-off-by: Name <email>",
+		}
+
+		Description = ""
+		for i, line := range templateLines {
+			Description += line
+			if i < len(templateLines)-1 {
+				Description += "\n"
+			}
+		}
+	}
+
 	KeyMap := huh.NewDefaultKeyMap()
 
 	KeyMap.Text = huh.TextKeyMap{
@@ -64,21 +93,38 @@ func CreateForm() *huh.Form {
 				Value(&Scope),
 		),
 		huh.NewGroup(
+			huh.NewInput().
+				Title("✏️\u00A0 Commit title").
+				Description("A short summary of the change (max 72 characters)").
+				Validate(ValidateTitle).
+				Value(&Title),
+		),
+		huh.NewGroup(
 			huh.NewText().
-				Title("✏️\u00A0 Type your commit message").
-				Description("Enter a concise and descriptive commit message").
+				Title("📝 Commit description (optional)").
+				Description("A more detailed explanation of the change").
 				CharLimit(1000).
-				Validate(ValidateMessage).
-				Value(&Message),
+				Value(&Description).WithHeight(14),
 		),
 		huh.NewGroup(
 			huh.NewConfirm().
 				Title("🧐 Are you sure?").
 				DescriptionFunc(func() string {
 					commitPrefix := utils.CommitLabels[CommitType]
-					var description = fmt.Sprintf("%s\nConfirm commit creation.", utils.BuildCommitMessage(commitPrefix, Scope, Message))
 
-					return description
+					fullMessage := utils.BuildCommitMessage(commitPrefix, Scope, Title)
+
+					if Description != "" {
+						lines := 1
+						for _, c := range Description {
+							if c == '\n' {
+								lines++
+							}
+						}
+						fullMessage += fmt.Sprintf("\n(+%d lines)", lines)
+					}
+
+					return fmt.Sprintf("%s\nConfirm commit creation.", fullMessage)
 				}, nil).
 				Affirmative("Yes!").
 				Negative("No.").

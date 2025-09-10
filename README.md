@@ -50,7 +50,7 @@ Inside a Git repository:
 cmit
 
 # Show a list of available commands and flags
-cmit help
+cmit --help
 ```
 
 Example of a generated commit message:

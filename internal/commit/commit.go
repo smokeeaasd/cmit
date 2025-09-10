@@ -26,7 +26,10 @@ func ExecuteCommit(extraArgs []string) {
 		log.Fatal("Invalid commit type selected")
 	}
 
-	var commitMessage = utils.BuildCommitMessage(commitPrefix, form.Scope, form.Message)
+	commitMessage := utils.BuildCommitMessage(commitPrefix, form.Scope, form.Title)
+	if form.Description != "" {
+		commitMessage += "\n\n" + form.Description
+	}
 
 	escapedMessage := strings.ReplaceAll(commitMessage, "\"", "\\\"")
 	fmt.Printf("\n✅ Commit message: \n%s\n\n", commitMessage)

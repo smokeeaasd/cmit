@@ -50,10 +50,10 @@ func TestCommitMessageFormatting(t *testing.T) {
 func TestCommitWithExtraArgs(t *testing.T) {
 	form.CommitType = "feat"
 	form.Scope = "core"
-	form.Message = "Add feature"
+	form.Title = "Add feature"
 	extra := []string{"--no-verify", "--amend"}
 
-	args, err := buildCmdArgs(form.Message, form.Scope, form.CommitType, extra)
+	args, err := buildCmdArgs(form.Title, form.Scope, form.CommitType, extra)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -71,9 +71,9 @@ func TestCommitWithExtraArgs(t *testing.T) {
 func TestInvalidCommitType(t *testing.T) {
 	form.CommitType = "invalid"
 	form.Scope = ""
-	form.Message = "Some message"
+	form.Title = "Some message"
 
-	_, err := buildCmdArgs(form.Message, form.Scope, form.CommitType, nil)
+	_, err := buildCmdArgs(form.Title, form.Scope, form.CommitType, nil)
 	if err == nil {
 		t.Errorf("expected error for invalid commit type")
 	}
