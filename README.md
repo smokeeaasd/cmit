@@ -1,6 +1,6 @@
 # cmit
 
-A **CLI tool to standardize commit messages** following the Conventional Commits style, with predefined types, optional scopes, and descriptive emojis. It works as a wrapper around `git commit`, helping maintain consistency in the repository history.
+A **CLI tool to standardize commit messages** following the Conventional Commits style, with predefined types, optional scopes, and descriptive emojis. It works as a wrapper around `git commit`, helping maintain consistency in the repository history, **and also provides a complete commit template to guide users in writing detailed and well-structured commit messages**.
 
 ---
 
